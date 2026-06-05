@@ -4,44 +4,56 @@ class Ciclista:
 
     def __init__(self):
 
-        self.x = 375
+        self.x = 400
         self.y = 500
 
-        self.ancho = 50
-        self.alto = 80
+        self.velocidad_x = 0
+        self.aceleracion = 0.8
+        self.friccion = 0.85
+        self.max_vel = 8
 
-        self.velocidad = 6
+        self.energia = 100
+        self.energia_max = 100
 
-        self.color = (0, 0, 0)
+        self.imagen = pygame.image.load("assets/imagenes/ciclista.png")
+        self.imagen = pygame.transform.scale(self.imagen, (60, 80))
 
     def mover(self, teclas):
 
+        # movimiento suave lateral
         if teclas[pygame.K_LEFT]:
-            self.x -= self.velocidad
+            self.velocidad_x -= self.aceleracion
 
         if teclas[pygame.K_RIGHT]:
-            self.x += self.velocidad
+            self.velocidad_x += self.aceleracion
 
-        # Limites carretera
+        self.velocidad_x *= self.friccion
+
+        # límite velocidad lateral
+        self.velocidad_x = max(-self.max_vel, min(self.velocidad_x, self.max_vel))
+
+        self.x += self.velocidad_x
+
+        # límites pista
         if self.x < 220:
             self.x = 220
+            self.velocidad_x = 0
 
-        if self.x > 530:
-            self.x = 530
+        if self.x > 520:
+            self.x = 520
+            self.velocidad_x = 0
+
+        # energía
+        if teclas[pygame.K_UP] and self.energia > 0:
+            self.energia -= 0.2
+
+        if teclas[pygame.K_DOWN]:
+            self.energia += 0.2
+
+        self.energia = max(0, min(self.energia, self.energia_max))
 
     def dibujar(self, pantalla):
-
-        pygame.draw.rect(
-            pantalla,
-            self.color,
-            (self.x, self.y, self.ancho, self.alto)
-        )
+        pantalla.blit(self.imagen, (self.x, self.y))
 
     def obtener_rectangulo(self):
-
-        return pygame.Rect(
-            self.x,
-            self.y,
-            self.ancho,
-            self.alto
-        )
+        return pygame.Rect(self.x + 10, self.y + 10, 40, 60)
